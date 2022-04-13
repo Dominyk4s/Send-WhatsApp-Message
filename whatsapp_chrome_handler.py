@@ -11,7 +11,7 @@ def login(driver):
 
 
 def get_contact(phone, driver):
-    driver.get("https://web.whatsapp.com/send?phone=‭" + str(phone))
+    driver.get('https://web.whatsapp.com/send?phone=' + str(phone))
     print('Loaded contact: {}'.format(phone))
 
 
