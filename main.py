@@ -43,15 +43,18 @@ def data_pipeline(df):
     global PHONE_COLUMN
     global SELECT_RANDOM
     global RANDOM_COUNT
+
     df.drop_duplicates(subset=[PHONE_COLUMN], inplace=True)  # Removing duplicates if phone number repeats
-    try:
-        if RANDOM_COUNT > 0:
-            if SELECT_RANDOM:
-                df = df.sample(n=RANDOM_COUNT)
-            else:
-                df = df.head(RANDOM_COUNT)
-    except:
-        pass
+    #try:
+    if int(RANDOM_COUNT) > 0:
+        if SELECT_RANDOM:
+            df = df.sample(n=int(RANDOM_COUNT))
+            print('Selected random')
+        else:
+            df = df.head(int(RANDOM_COUNT))
+            print('Selected sample')
+    #except:
+    #    print('Did not select data subset')
     df = df.fillna(value='')  # Filling na not to show "None" in text messages (shows '' instead)
     return df
 

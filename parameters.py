@@ -10,6 +10,6 @@ text_message_form = [
       'хорошего. '
 ]
 PHONE_COLUMN = 'phone_number'
-FILE_PATH = 'data_file.csv'
+FILE_PATH = '../data_file.csv'
 SELECT_RANDOM = False  # If to select random rows from data file
 RANDOM_COUNT = 3  # How many rows to select if SELECT_RANDOM=True
