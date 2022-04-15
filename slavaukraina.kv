@@ -1,0 +1,221 @@
+<GreenButton@Button>:
+    background_color: 1, 1, 1, 1
+    size_hint_y: None
+    height: 50
+
+<ScreenManagement>:
+    #transition: FallOutTransition()
+    Parameters:
+        id: parameters
+        name: 'Parameters'
+    Parameters2:
+        id: parameters2
+        name: 'Parameters2'
+    ReadyToSend:
+        id: readytosend
+        name: 'ReadyToSend'
+
+<Parameters>:
+    random_label: random_label
+    random_input: RANDOM_COUNT_ID
+
+    GridLayout:
+
+        spacing: 10
+        padding: 20
+        cols: 1
+        height: self.minimum_height
+        
+        Image:
+            source: 'Flag_of_Ukraine.png'
+            size: self.texture_size
+        Label:    # Label is just text
+            text: 'Nustatymai'
+        
+
+        GridLayout:
+            
+            spacing: 10
+            cols: 2
+            row_force_default: True
+            row_default_height: 50
+            Label:    # Label is just text
+                id: File_Input_Descriptipn
+                text: 'Įveskite failo su duomenimis vietą'
+            #FileChooserListView:
+            #    id: FILE_PATH_ID
+            
+            TextInput:
+                id: FILE_PATH_ID
+                text: 'data_file.csv'
+                hint_text: 'pvz. users/user_name/documnets/desktop/data.csv'
+                multiline: False
+            Label:
+                text: 'Rinkti atstiktinai gavėjus iš sąrašo:'
+            CheckBox:
+                id: SELECT_RANDOM_ID
+                color: [1, 1, 1, 1]
+                on_active:
+                    #Shows enter field for random number
+                    #root.random_label.opacity=1    # Invisible
+                    #root.random_input.opacity=1    # Invisible
+     
+            
+            Label:
+                id: random_label
+                #opacity: 0
+                text: 'Keliems žmonėms siųsti?  (-1: visiems)'
+                
+            TextInput:
+                id: RANDOM_COUNT_ID
+                #opacity: 0
+                text: '-1'
+                input_filter: 'int'
+                width: 100
+                multiline: False
+                
+        
+        GreenButton:
+            id: Parameters_buttontoscreen2   
+            text: 'Tęsti'    
+            on_release:
+                root.manager.current = 'Parameters2'
+
+<Parameters2>:
+
+    df_columns: df_columns
+
+
+    GridLayout:    # RelativeLayout allows the elements of a screen to be positioned relatively to the position of the screen
+        spacing: 10
+        padding: 20
+        cols: 1
+
+
+        
+        GridLayout:
+            cols:2
+            size_hint: (0.2, 1)
+            #size_hint_x: 0.25
+            #size_hint: (1, 0.9)
+            Label:   
+                text: 'Rasti stulpeliai duomenų faile:'
+                #height:200
+                size_hint_y: 0.4
+
+
+    
+            TextInput:    
+                id: df_columns  
+                text: ''
+                #size_hint: (0.5, 0.8)
+                height:200
+                background_color: [0.5, 0.5, 0.5, 1]
+                size_hint_y: 0.4
+
+
+            Label:
+                text: 'Įveskite telefono stulpelio pavadinimą:'
+                #size_hint: (0.5, 0.2)
+                size_hint_y: 0.1
+
+            TextInput:
+                id: PHONE_COLUMN
+                #opacity: 0
+                text: 'phone_number'
+                multiline: False
+                #size_hint: (0.5, 0.2)
+                size_hint_y: 0.1
+
+            Label:
+                text: 'Įveskite teksto žinutę 1:'
+                #size_hint: (0.5, 0.2)
+                size_hint_y: 0.3
+
+            TextInput:
+                id: text_message_form_1
+                text: '{first_name} {full_name}?'
+                multiline: True
+                size_hint_y: 0.2
+
+            Label:
+                text: 'Įveskite teksto žinutę 2:'
+                #size_hint: (0.5, 0.2)
+                size_hint_y: 0.2
+
+            TextInput:
+                id: text_message_form_2
+                text: '{address_street} {address_house}{address_entrance}, {address_city}?'
+                multiline: True
+                size_hint_y: 0.2
+
+            Label:
+                text: 'Įveskite teksto žinutę 3:'
+                #size_hint: (0.5, 0.2)
+                size_hint_y: 0.5
+
+            TextInput:
+                id: text_message_form_3
+                text: 'Здравствуйте, мы пишем вам из Литвы, чтобы предупредить вас. Наша организация получила из России секретный список людей, которые в ближайшее время могут быть призваны в армию для участия в боевых действиях в Украине. Ваше имя и все ваши данные есть в этом списке - вы поедете в Украину. В российской армии уже не хватает солдат, из 190 000 россиян, находящихся в Украине, погибло до 20 000 человек. Мы хотим, чтобы вы знали об этом, чтобы вам не грозила опасность умереть в Украине. Подумайте, как можно избежать мобилизации в будущем. Мы не можем предоставить вам больше информации ради собственной безопасности. Всего хорошего. '
+                multiline: True
+                size_hint_y: 0.5
+
+
+             
+        BoxLayout: 
+            cols: 2
+            height: 20
+            size_hint_y: 0.1
+            GreenButton:
+                id: screen2_buttontoParameters    
+                text: 'Atgal'      
+                on_release:
+                    root.manager.current = 'Parameters'   
+       
+            GreenButton:
+                text: 'Tęsti'    # Text in the button
+                on_release:
+                    root.manager.current = 'ReadyToSend'
+                    
+<ReadyToSend>:
+
+    GridLayout:
+        cols: 1
+        spacing: 20
+        padding: 10
+
+        Label:
+            text: 'Pasiruošta prisijungti prie WhatsApp ir siųsti žinutes!'
+            size_hint_y: 0.1
+            halign: 'left'
+
+        Label:
+            text: '1. Prisijunkite prie WhatsApp spausdami žemiau esantį mygtuką (atidarys Chrome langą) \n2. Sėkmingai prisijungus, neuždarykite Chrome ir spauskite "Siųsti žinutes"'
+            size_hint_y: 0.1
+            halign: 'left'
+
+
+        GridLayout:
+            cols: 2
+
+            Button:
+                text: '1. Prisijungti prie WhatsApp'
+                on_release:
+                    app.login()
+
+            Button:
+                id: ButtonSend    # Identifier
+                text: '2. Siųsti žinutes'    # Text in the button
+                on_release:
+                    app.get_contact_compose_and_send()
+
+        BoxLayout:
+            cols: 2
+            height: 20
+            size_hint_y: 0.1
+
+            GreenButton:
+
+                text: 'Atgal'    # Text in the button
+                on_release:
+                    root.manager.current = 'Parameters2'

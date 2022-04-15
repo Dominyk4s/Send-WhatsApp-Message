@@ -1,0 +1,164 @@
+#WITH DEMO APP:
+
+
+pyinstaller -y --clean --windowed --name touchtracer \
+  --exclude-module _tkinter \
+  --exclude-module Tkinter \
+  --exclude-module enchant \
+  --exclude-module twisted \
+/Users/dominykas/kivy_venv/share/kivy-examples/demo/touchtracer/main.py
+
+
+
+#Add  Tree('/Users/dominykas/kivy_venv/share/kivy-examples/demo/touchtracer/') to .spec file
+coll = COLLECT(exe, Tree('/Users/dominykas/kivy_venv/share/kivy-examples/demo/touchtracer/'),
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=None,
+               upx=True,
+               name='touchtracer')
+
+#BUILD:
+pyinstaller -y --clean --windowed touchtracer.spec
+
+
+
+#-------------------- WITH MY APP ----------------------------------------
+source kivy_venv/bin/activate
+cd /Users/dominykas/kivy_venv
+
+pyinstaller -y --clean --windowed --name ukrainai \
+  --exclude-module _tkinter \
+  --exclude-module Tkinter \
+  --exclude-module enchant \
+  --exclude-module twisted \
+  --exclude-module "PyQt5" \
+/Users/dominykas/PycharmProjects/Send-WhatsApp-Message/main.py
+
+
+
+#Add  Tree('/Users/dominykas/PycharmProjects/Send-WhatsApp-Message/') to .spec file, e.g.:
+coll = COLLECT(exe, Tree('/Users/dominykas/PycharmProjects/Send-WhatsApp-Message/'),
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=None,
+               upx=True,
+               name='ukrainai')
+
+
+#BUILD:
+pyinstaller -y --clean --windowed ukrainai.spec 
+
+pyinstaller -y --clean --windowed --codesign-identity ukrainai_certificate ukrainai.spec 
+
+
+pushd dist
+hdiutil create ./ukrainai.dmg -srcfolder ukrainai.app -ov
+popd
+
+
+
+
+------------------------------ INTEL ------------------------------
+source kivy_venv_rosetta/bin/activate
+cd /Users/dominykas/kivy_venv_rosetta
+
+pyinstaller -y --clean --windowed --name ukrainai_intel \
+  --exclude-module _tkinter \
+  --exclude-module Tkinter \
+  --exclude-module enchant \
+  --exclude-module twisted \
+  --exclude-module "PyQt5" \
+/Users/dominykas/PycharmProjects/Send-WhatsApp-Message/main.py
+
+
+
+#Add  Tree('/Users/dominykas/PycharmProjects/Send-WhatsApp-Message/') to .spec file, e.g.:
+coll = COLLECT(exe, Tree('/Users/dominykas/PycharmProjects/Send-WhatsApp-Message/'),
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=None,
+               upx=True,
+               name='ukrainai_intel')
+
+
+#BUILD:
+pyinstaller -y --clean --windowed ukrainai_intel.spec 
+
+
+
+pushd dist
+hdiutil create ./ukrainai.dmg -srcfolder ukrainai.app -ov
+popd
+
+
+
+
+------------------------------ SETTING UP INTEL ENVIROMENT ------------------------------------
+
+#? Reinstalling brew packages with intel brew?
+alias brow='/usr/local/bin/brew'
+brow reinstall --build-from-source sdl2 sdl2_image sdl2_ttf sdl2_mixer
+
+
+
+
+
+#To create intel enviroment with conda (I'm using miniforge):
+CONDA_SUBDIR=osx-64 conda create -n rosetta python   # create a new environment called rosetta with intel packages.
+conda activate kivy_venv_rosetta
+python -c "import platform;print(platform.machine())"
+conda env config vars set CONDA_SUBDIR=osx-64  # make sure that conda commands in this environment use intel packages
+conda deactivate kivy_venv_rosetta
+conda activate kivy_venv_rosetta
+
+
+
+python -m pip install "kivy[base]" kivy_examples
+
+pip install PyObjC #For AppKit
+
+pip install Cython
+pip install kivy
+pip install pyinstaller
+
+
+
+
+#-------------------- Building app
+
+conda activate kivy_venv_rosetta
+cd /Users/dominykas/miniforge3/envs/kivy_venv_rosetta
+
+pyinstaller -y --clean --windowed --name ukrainai_intel \
+  --exclude-module _tkinter \
+  --exclude-module Tkinter \
+  --exclude-module enchant \
+  --exclude-module twisted \
+  --exclude-module "PyQt5" \
+/Users/dominykas/PycharmProjects/Send-WhatsApp-Message/main.py
+
+
+
+
+#Add  Tree('/Users/dominykas/PycharmProjects/Send-WhatsApp-Message/') to .spec file, e.g.:
+coll = COLLECT(exe, Tree('/Users/dominykas/PycharmProjects/Send-WhatsApp-Message/'),
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=None,
+               upx=True,
+               name='ukrainai_intel')
+
+
+#BUILD:
+pyinstaller -y --clean --windowed ukrainai_intel.spec 
+
+
+
+pushd dist
+hdiutil create ./ukrainai_intel.dmg -srcfolder ukrainai_intel.app -ov
+popd

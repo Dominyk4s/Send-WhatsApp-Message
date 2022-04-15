@@ -1,13 +1,31 @@
+from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.properties import ObjectProperty
+
+import parameters as params
 import whatsapp_chrome_handler as wa
-import parameters as param
+
 import pandas as pd
-import time
+
+FILE_PATH = params.FILE_PATH
+SELECT_RANDOM = params.SELECT_RANDOM
+RANDOM_COUNT = params.RANDOM_COUNT
+text_message_form = params.text_message_form
+PHONE_COLUMN = params.PHONE_COLUMN
+df = pd.DataFrame()
+driver = ''
 
 
-def generate_messages(row, text_message_form):
+## THE BUILDER HAS THE CODE THAT DEFINES THE APPEARANCE OF THE APP. IT IS THE KIVY CODE
+# Builder.load_file('padekimukrainai.kv')
+
+## THIS PART IS THE PYTHON CODE
+
+
+def generate_messages(row, form):
     text_messages = []
     try:
-        for message in text_message_form:
+        for message in form:
             text_messages.append(message.format(**row))
     except:
         print('LT: Patikrink, ar duomenų faile yra visi tekste nurodyti stulpeliai, kuriuos nori naudoti žinutėje')
@@ -16,41 +34,115 @@ def generate_messages(row, text_message_form):
     return text_messages
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    # Reading Data
-    df = pd.read_csv(param.FILE_PATH)
-    df.drop_duplicates(subset=[param.PHONE_COLUMN], inplace=True)  # Removing duplicates if phone number repeats
-    if param.SELECT_RANDOM:
-        df = df.sample(n=param.RANDOM_COUNT)
+def read_file():
+    global FILE_PATH
+    return pd.read_csv(FILE_PATH)
+
+
+def data_pipeline(df):
+    global PHONE_COLUMN
+    global SELECT_RANDOM
+    global RANDOM_COUNT
+    df.drop_duplicates(subset=[PHONE_COLUMN], inplace=True)  # Removing duplicates if phone number repeats
+    try:
+        if RANDOM_COUNT > 0:
+            if SELECT_RANDOM:
+                df = df.sample(n=RANDOM_COUNT)
+            else:
+                df = df.head(RANDOM_COUNT)
+    except:
+        pass
     df = df.fillna(value='')  # Filling na not to show "None" in text messages (shows '' instead)
+    return df
 
-    # Overwrite phone number if you want to test in on your phone number or any other single phone number:
-    # df[param.PHONE_COLUMN]=37060000000
 
-    # Generating message text as pandas column
-    messages = []
-    df['message_to_send'] = ''
-    for index, row in df.iterrows():
-        message = generate_messages(row=row, text_message_form=param.text_message_form)
-        df.at[index, 'message_to_send'] = message
+class Parameters(Screen):
+    # Controls the visibility of fields based on send random checkmark
+    random_label = ObjectProperty(None)
+    random_input = ObjectProperty(None)
 
-    # Getting driver (opening browser)
-    driver = wa.get_driver()
 
-    # Logging in to WhatsApp
-    wa.login(driver)
-    print('LT: Nuskenuokite QR kodą, prisijungus spauskinte "Enter"')
-    print('EN: Login by scanning QR Code, and press Enter')
-    input()
-    print('Prisijungta prie WhatsApp/Logged in to WhatsApp')
-    time.sleep(3)
+class Parameters2(Screen):
+    def on_enter(self, *args):
+        global FILE_PATH
+        global SELECT_RANDOM
+        global RANDOM_COUNT
+        FILE_PATH = self.manager.ids.parameters.ids.FILE_PATH_ID.text
+        SELECT_RANDOM = self.manager.ids.parameters.ids.SELECT_RANDOM_ID.active
+        RANDOM_COUNT = self.manager.ids.parameters.ids.RANDOM_COUNT_ID.text
+        try:
+            df_temp = pd.read_csv(FILE_PATH)
+            self.df_columns.text = str(df_temp.columns)
+        except:
+            self.df_columns.text = 'KLAIDA: Nepavyko nuskaityti duomenų failo'
 
-    # Sending messages to all people from the file
-    for index, row in df.iterrows():
-        wa.get_contact_compose_and_send(phone=df.at[index, param.PHONE_COLUMN], driver=driver,
-                                        text_messages=df.at[index, 'message_to_send'])
-        print('Išsiųstos visos žinutės kontaktui/Finished with contact')
+class ReadyToSend(Screen):
+    def on_enter(self, *args):
+        global FILE_PATH
+        global SELECT_RANDOM
+        global RANDOM_COUNT
+        global text_message_form
+        global PHONE_COLUMN
 
-    # Exiting Chrome:
-    driver.quit()
+        # Assigning global parameters from Parameters2 window
+        PHONE_COLUMN = self.manager.ids.parameters2.ids.PHONE_COLUMN.text
+        text_message_form = [self.manager.ids.parameters2.ids.text_message_form_1.text, self.manager.ids.parameters2.ids.text_message_form_2.text, self.manager.ids.parameters2.ids.text_message_form_3.text]
+        print(text_message_form)
+
+
+class ScreenManagement(ScreenManager):
+    pass
+
+
+class SlavaUkrainaApp(App):
+    global df
+
+    def login(self):
+        global driver
+        global FILE_PATH
+
+        global driver
+        global PHONE_COLUMN
+        global text_message_form
+        global df
+
+        print('Inside login: ' + FILE_PATH)
+
+
+        df = read_file()
+        df = data_pipeline(df)
+
+        # In case of testing, overwrites all the numbers
+        #df[PHONE_COLUMN] = 37060000000
+
+        driver = wa.get_driver()
+        # Logging in to WhatsApp
+        wa.login(driver)
+
+        # Generating message text as pandas column
+        # messages = []
+        df['message_to_send'] = ''
+        for index, row in df.iterrows():
+            message = generate_messages(row=row, form=text_message_form)
+            df.at[index, 'message_to_send'] = message
+
+    def get_contact_compose_and_send(self):
+        # Sending messages to all people from the file
+        for index, self.row in df.iterrows():
+            try:
+                # message = generate_messages(row=row, text_message_form=text_message_form)
+                wa.get_contact_compose_and_send(phone=df.at[index, PHONE_COLUMN], driver=driver,
+                                                # text_messages=message
+                                                text_messages=df.at[index, 'message_to_send']
+                                                )
+            except:
+                print('Nepavyko išsiųsti žinutės numieriui: ' + str(df.at[index, PHONE_COLUMN]))
+                continue
+            print('Issiustos visos zinutes kontaktui/Finished with contact')
+
+    def build(self):
+        return ScreenManagement()
+
+
+if __name__ == '__main__':
+    SlavaUkrainaApp().run()
